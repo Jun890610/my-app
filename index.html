@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>홍콩 가족여행</title>
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+<style>
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+  background: #f5f6f8;
+}
+header {
+  background: #111;
+  color: #fff;
+  padding: 14px;
+  text-align: center;
+  font-weight: 700;
+}
+.tabs {
+  display: flex;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+}
+.tabs button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: none;
+  font-size: 14px;
+}
+.tabs button.active {
+  border-bottom: 3px solid #111;
+  font-weight: bold;
+}
+.section {
+  display: none;
+  padding: 14px;
+}
+.section.active {
+  display: block;
+}
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.time {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+.tag {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<header>🇭🇰 홍콩 가족여행 웹앱</header>
+
+<div class="tabs">
+  <button class="active" onclick="show(0)">2/15</button>
+  <button onclick="show(1)">2/16</button>
+  <button onclick="show(2)">☔ 우천</button>
+  <button onclick="show(3)">2/17</button>
+</div>
+
+<!-- 2/15 -->
+<div class="section active">
+  <div class="card"><div class="time">14:30–15:30</div><div class="tag">🚕 이동</div>공항 → 리츠칼튼 홍콩</div>
+  <div class="card"><div class="time">15:30–16:45</div><div class="tag">😴 낮잠</div>호텔 객실</div>
+  <div class="card"><div class="time">17:00–18:00</div><div class="tag">🍜 식사</div>Mak’s Noodle</div>
+  <div class="card"><div class="time">19:45–20:30</div><div class="tag">🍽 저녁</div>Crystal Jade</div>
+</div>
+
+<!-- 2/16 정상 -->
+<div class="section">
+  <div class="card"><div class="time">10:00–10:25</div><div class="tag">🎠</div>it’s a small world</div>
+  <div class="card"><div class="time">10:35–11:00</div><div class="tag">🎠</div>Winnie the Pooh</div>
+  <div class="card"><div class="time">11:10–11:30</div><div class="tag">📸</div>캐릭터 미팅</div>
+  <div class="card"><div class="time">12:00–12:30</div><div class="tag">🍽</div>점심 (Main Street)</div>
+  <div class="card"><div class="time">12:30–15:00</div><div class="tag">😴 낮잠</div>호텔 객실</div>
+  <div class="card"><div class="time">15:15–15:45</div><div class="tag">🎭</div>Lion King 쇼</div>
+  <div class="card"><div class="time">16:45–17:20</div><div class="tag">🚤</div>Jungle River Cruise</div>
+</div>
+
+<!-- 우천 -->
+<div class="section">
+  <div class="card"><div class="time">10:00–10:40</div>Lion King 쇼</div>
+  <div class="card"><div class="time">10:50–11:20</div>it’s a small world</div>
+  <div class="card"><div class="time">11:30–12:00</div>Animation Academy</div>
+  <div class="card"><div class="time">15:15–16:00</div>실내 캐릭터 미팅</div>
+</div>
+
+<!-- 2/17 -->
+<div class="section">
+  <div class="card"><div class="time">09:00–09:30</div>리조트 산책</div>
+  <div class="card"><div class="time">10:00–10:40</div>🚕 디즈니 → 공항</div>
+  <div class="card"><div class="time">14:40</div>✈️ 하노이 출발</div>
+</div>
+
+<script>
+function show(i){
+  document.querySelectorAll('.tabs button').forEach((b,idx)=>b.classList.toggle('active',idx===i));
+  document.querySelectorAll('.section').forEach((s,idx)=>s.classList.toggle('active',idx===i));
+}
+</script>
+
+</body>
+</html>
