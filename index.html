@@ -9,21 +9,63 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
 <style>
+
   :root{
     --bg:#f5f6f8;
-    --card:#fff;
+    --card:#ffffff;
     --text:#111;
     --muted:#666;
     --line:#e7e7e7;
+
+    /* 공통(컴포넌트) */
+    --radius:16px;
+    --shadow:0 10px 30px rgba(0,0,0,.06);
+    --shadow-soft:0 6px 18px rgba(0,0,0,.05);
+
+    /* 기본(홍콩) 컬러 */
+    --accent:#0b0b0b;
+    --accent-2:#111;
+    --brand:#ff2d55;     /* 네온 핑크 */
+    --brand-2:#00e5ff;   /* 네온 시안 */
+
+    /* 배경/헤더 */
+    --header-grad:linear-gradient(90deg,#060607 0%, #0b0b10 35%, #050506 100%);
+    --header-glow:radial-gradient(600px 220px at 18% 20%, rgba(255,45,85,.18), transparent 70%),
+                  radial-gradient(520px 220px at 82% 35%, rgba(0,229,255,.16), transparent 70%);
+    --body-grad:radial-gradient(900px 520px at 15% 12%, rgba(255,45,85,.09), transparent 70%),
+               radial-gradient(900px 520px at 85% 12%, rgba(0,229,255,.08), transparent 70%);
   }
-  body{
+
+  /* 2/16 디즈니 테마(자동 적용) */
+  :root[data-theme="disney"]{
+    --bg:#fff7fb;
+    --card:#ffffff;
+    --text:#151515;
+    --muted:#6a5a64;
+    --line:#f0dfe8;
+
+    --brand:#ff4fa3;   /* 핑크 */
+    --brand-2:#7a5cff; /* 보라 */
+
+    --header-grad:linear-gradient(90deg,#1b0a2a 0%, #2a0b1c 45%, #130a2a 100%);
+    --header-glow:radial-gradient(620px 240px at 20% 30%, rgba(255,79,163,.22), transparent 70%),
+                  radial-gradient(620px 240px at 78% 35%, rgba(122,92,255,.20), transparent 70%);
+    --body-grad:radial-gradient(900px 520px at 18% 10%, rgba(255,79,163,.12), transparent 70%),
+               radial-gradient(900px 520px at 82% 10%, rgba(122,92,255,.11), transparent 70%);
+  }
+
+body{
     margin:0;
     font-family:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
     background:var(--bg);
+    background-image:var(--body-grad);
+    background-attachment:fixed;
     color:var(--text);
   }
   header{
-    background:#111;
+    background:var(--accent);
+    background-image:var(--header-grad), var(--header-glow);
+    background-size:cover;
     color:#fff;
     padding:18px 16px 22px;
   padding-right:280px;
@@ -249,6 +291,65 @@ header.topbar{
 .info-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
 .btn.small { padding: 8px 10px; border-radius: 999px; font-size: 13px; }
 .muted { color: rgba(0,0,0,0.60); font-size: 13px; }
+
+
+  body{
+    background: var(--bg);
+    background-image: var(--body-grad);
+    color: var(--text);
+  }
+
+  header{
+    background: var(--header-grad);
+    position: sticky;
+    top:0;
+    z-index: 20;
+    overflow:hidden;
+  }
+  header::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: var(--header-glow);
+    pointer-events:none;
+  }
+
+  .day-tab.active{
+    border-color: rgba(255,255,255,.65);
+    box-shadow: 0 10px 26px rgba(0,0,0,.18);
+  }
+
+  .chip{
+    background: color-mix(in oklab, var(--brand) 8%, #fff);
+    border: 1px solid color-mix(in oklab, var(--brand) 18%, #fff);
+  }
+  .chip .emoji{ filter: drop-shadow(0 1px 0 rgba(0,0,0,.12)); }
+
+  .card{
+    border:1px solid var(--line);
+    box-shadow: var(--shadow-soft);
+    border-radius: var(--radius);
+  }
+
+  .btn-primary{
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    border: none;
+    box-shadow: 0 10px 26px rgba(0,0,0,.18);
+  }
+  .btn-primary:hover{ transform: translateY(-1px); }
+
+  .map-btn{
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  }
+
+  /* 디즈니 날(2/16)에는 카드에 은은한 반짝이 느낌 */
+  :root[data-theme="disney"] .card{
+    background-image:
+      radial-gradient(12px 12px at 10% 18%, rgba(255,255,255,.65), transparent 70%),
+      radial-gradient(10px 10px at 82% 22%, rgba(255,255,255,.55), transparent 70%),
+      radial-gradient(14px 14px at 35% 75%, rgba(255,255,255,.45), transparent 70%);
+    background-blend-mode: screen;
+  }
 
 </style>
 </head>
@@ -590,7 +691,15 @@ function renderTabs(){
   });
 }
 
+
+  function applyTheme(){
+    // 2/16(디즈니)만 디즈니 테마 적용, 나머지는 홍콩 테마
+    const theme = (activeTab === '2/16') ? 'disney' : 'hk';
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+
 function render(){
+  applyTheme();
   renderTabs();
 
   const isInfo = (activeTab === "📌 필수정보");
