@@ -183,6 +183,28 @@
 .day-weather-banner{margin:10px 0 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
 .day-weather-banner .label{font-weight:800;}
 
+
+/* ✅ 스케줄 우측 상단 '날씨 아이콘 + 기온' (버튼/포캐스트 UI 제거) */
+#contentRoot{ position: relative; }
+.day-weather-mini{
+  position:absolute;
+  top:10px;
+  right:10px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  font-weight:700;
+  font-size:13px;
+  z-index:5;
+}
+.day-weather-mini .dw-emoji{ font-size:16px; line-height:1; }
+.day-weather-mini .dw-temp{ letter-spacing:0.2px; }
+
 </style>
 </head>
 
@@ -204,10 +226,7 @@
 
     <button id="addItemBtn" class="btn" disabled>+ 일정 추가</button>
     <button id="resetBtn" class="btn btn-ghost" disabled>초기화</button>
-
-    <button id="weatherBtn" class="btn btn-ghost">날씨</button>
-
-    <button id="exportBtn" class="btn btn-ghost">내보내기</button>
+<button id="exportBtn" class="btn btn-ghost">내보내기</button>
     <label class="btn btn-ghost" for="importFile">가져오기</label>
     <input id="importFile" type="file" accept="application/json" style="display:none" />
   </div>
@@ -868,38 +887,56 @@ function getDayForecast(api, iso){
   };
 }
 
-// 각 날짜 탭 상단에 "날씨 배너"를 버튼/칩 형태로 표시
-function renderDayWeatherBanner(api){
-  const {map} = WEATHER.resolveTripDates();
-  const iso = map[activeTab];
-  const f = iso ? getDayForecast(api, iso) : null;
 
-  // 기존 배너 제거
-  const old = document.getElementById("dayWeatherBanner");
-  if(old) old.remove();
-
-  if(!f) return;
-
-  const banner = document.createElement("div");
-  banner.id = "dayWeatherBanner";
-  banner.className = "day-weather-banner";
-  banner.innerHTML = `
-    <span class="label">오늘(${activeTab}) 날씨</span>
-    <span class="weather-chip">${escapeHtml(f.text)}</span>
-    <span class="weather-chip">최고 ${f.max}° / 최저 ${f.min}°</span>
-    <span class="weather-chip">강수확률 ${f.pop}%</span>
-    <button id="openWeatherFromBanner" class="btn btn-ghost">자세히</button>
-  `;
-
-  // contentRoot 맨 위에 삽입
-  if(contentRoot) contentRoot.prepend(banner);
-
-  const btn = document.getElementById("openWeatherFromBanner");
-  if(btn){
-    btn.addEventListener("click", ()=> openWeatherModal());
-  }
+function wmoToEmoji(code){
+  // 간단 아이콘(이모지) 매핑
+  if(code === 0) return "☀️";
+  if([1,2].includes(code)) return "⛅️";
+  if(code === 3) return "☁️";
+  if([45,48].includes(code)) return "🌫️";
+  if([51,53,55,56,57].includes(code)) return "🌦️";
+  if([61,63,65,66,67,80,81,82].includes(code)) return "🌧️";
+  if([71,73,75,77,85,86].includes(code)) return "🌨️";
+  if([95,96,99].includes(code)) return "⛈️";
+  return "🌤️";
 }
 
+function renderDayWeatherMini(api){
+  const root = document.getElementById("contentRoot");
+  if(!root) return;
+
+  // 기존 미니 위젯 제거
+  const existing = document.getElementById("dayWeatherMini");
+  if(existing) existing.remove();
+
+  const iso = resolveTripDateIso(activeTab);
+  if(!iso) return;
+
+  const f = getDayForecast(api, iso);
+  if(!f) return;
+
+  const emoji = wmoToEmoji(api.daily.weather_code[api.daily.time.indexOf(iso)]);
+  const tempText = Math.round(f.max) + "°"; // 최고기온 기준 (요청: 아이콘+기온만)
+
+  const mini = document.createElement("div");
+  mini.id = "dayWeatherMini";
+  mini.className = "day-weather-mini";
+  mini.title = `${f.text} / 최고 ${Math.round(f.max)}°, 최저 ${Math.round(f.min)}° / 강수확률 ${f.pop}%`;
+  mini.innerHTML = `<span class="dw-emoji">${emoji}</span><span class="dw-temp">${tempText}</span>`;
+
+  root.appendChild(mini);
+}
+
+// 탭(2/15, 2/16, 2/17) -> ISO 날짜 매핑
+function resolveTripDateIso(tab){
+  // 화면 탭 값은 "2/15" 형태
+  const map = {
+    "2/15": "2026-02-15",
+    "2/16": "2026-02-16",
+    "2/17": "2026-02-17"
+  };
+  return map[String(tab)];
+}
 async function ensureWeather(){
   if(weatherCache) return weatherCache;
   weatherCache = await WEATHER.fetch(); window.weatherCache = weatherCache;
@@ -918,60 +955,20 @@ function closeWeatherModal(){
   modal.classList.add("hidden");
 }
 
+
 async function initWeatherUI(){
-  const btn = document.getElementById("weatherBtn");
-  const closeBtn = document.getElementById("weatherClose");
-  const modal = document.getElementById("weatherModal");
-
-  if(btn){
-    btn.addEventListener("click", async ()=>{
-      try{
-        const api = await ensureWeather();
-        renderWeatherModal(api);
-        renderDayWeatherBanner(api);
-        openWeatherModal();
-      }catch(e){
-        alert("날씨 정보를 불러오지 못했어요. 네트워크를 확인해 주세요.");
-        console.error(e);
-      }
-    });
-  }
-  if(closeBtn) closeBtn.addEventListener("click", closeWeatherModal);
-  if(modal){
-    modal.addEventListener("click", (e)=>{
-      if(e.target === modal) closeWeatherModal();
-    });
-  }
-
-  // 첫 로딩 시에도 배너는 시도(네트워크 실패해도 앱은 동작)
+  // 첫 로딩 시: 날씨 미니표시를 시도 (실패해도 앱은 정상 동작)
   try{
     const api = await ensureWeather();
-    renderDayWeatherBanner(api);
+    renderDayWeatherMini(api);
   }catch(e){
     console.warn("weather preload failed", e);
   }
 }
 
+
 </script>
 
-<!-- 🌤️ 날씨 모달 -->
-<div id="weatherModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="weatherTitle">
-  <div class="modal-card">
-    <div class="modal-head">
-      <div>
-        <div id="weatherTitle" class="modal-title">홍콩 날씨</div>
-        <div class="modal-sub">Open‑Meteo 기반 · 16일 예보</div>
-      </div>
-      <button id="weatherClose" class="btn btn-ghost">닫기</button>
-    </div>
-    <div class="modal-body">
-      <div id="weatherNow" class="weather-now">불러오는 중…</div>
-      <div class="weather-list-title">날짜별 예보</div>
-      <div id="weatherList" class="weather-list"></div>
-      <div class="weather-note">* 예보는 바뀔 수 있어요. 출발 전/당일에 다시 확인하세요.</div>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
