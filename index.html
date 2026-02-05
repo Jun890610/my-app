@@ -1,7 +1,258 @@
 <!DOCTYPE html>
-<html lang=
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>홍콩 가족여행</title>
 
-  <!-- ✅ 하단 툴바(편집/추가/초기화/내보내기) -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --card:#fff;
+    --text:#111;
+    --muted:#666;
+    --line:#e7e7e7;
+  }
+  body{
+    margin:0;
+    font-family:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  header{
+    background:#111;
+    color:#fff;
+    padding:18px 16px 22px;
+  padding-right:280px;
+    text-align:center;
+    font-weight:800;
+    letter-spacing:-0.2px;
+    min-height:84px;
+}
+  header .sub{
+    font-weight:600;
+    opacity:.85;
+    font-size:12px;
+    margin-top:6px;
+  }
+
+  .tabs{
+    display:flex;
+    background:#fff;
+    border-bottom:1px solid #ddd;
+    position:sticky;
+    top:0;
+    z-index:10;
+    overflow:auto;
+  }
+  .tabs button{
+    flex:1;
+    min-width:90px;
+    padding:12px 10px;
+    border:none;
+    background:none;
+    font-size:14px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .tabs button.active{
+    border-bottom:3px solid #111;
+    font-weight:800;
+  }
+
+  .wrap{ padding:14px; max-width:920px; margin:0 auto; }
+  .toolbar{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    padding:10px 0; margin:2px 0 12px;
+  }
+  .edit-toggle{
+    display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none;
+    background:#fff; border:1px solid var(--line); border-radius:999px;
+    padding:8px 12px;
+  }
+  .btn{
+    padding:8px 12px; border-radius:10px; border:1px solid #ddd;
+    background:#111; color:#fff; cursor:pointer;
+  }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .btn-ghost{ background:#fff; color:#111; }
+
+  .card{
+    background:var(--card);
+    border-radius:14px;
+    padding:12px;
+    margin:12px 0;
+    border:1px solid #eee;
+  }
+  .card-header{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:flex-start;
+    min-height:84px;
+}
+  .time{ font-weight:900; margin-bottom:6px; }
+  .title{ font-weight:800; margin-top:2px; }
+  .tag{
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid #eee;
+    color:#333;
+    background:#fafafa;
+    flex:0 0 auto;
+  }
+  .meta{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:6px;
+    line-height:1.45;
+  }
+  .map-btn{
+    display:inline-block;
+    margin-top:10px;
+    padding:9px 12px;
+    border-radius:12px;
+    background:#111;
+    color:#fff;
+    text-decoration:none;
+    font-size:13px;
+  }
+
+  /* 편집 폼 */
+  .edit-row{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+  .edit-row input, .edit-row textarea, .edit-row select{
+    width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;
+    font-size:14px;
+    background:#fff;
+  }
+  .edit-actions{ display:flex; gap:8px; margin-top:10px; }
+  .small-btn{ padding:8px 10px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; }
+  .small-btn.danger{ border-color:#ffb3b3; color:#b30000; }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; }
+  @media (max-width:720px){ .grid2{ grid-template-columns:1fr; } }
+
+  /* 정보 섹션 */
+  details{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:14px;
+    padding:10px 12px;
+    margin:12px 0;
+  }
+  summary{
+    cursor:pointer;
+    font-weight:800;
+    list-style:none;
+  }
+  summary::-webkit-details-marker{ display:none; }
+  .info{
+    margin-top:10px;
+    color:#333;
+    line-height:1.55;
+    font-size:14px;
+  }
+  .info ul{ margin:8px 0 0 18px; }
+  .pill{
+    display:inline-block;
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid #eee;
+    background:#fafafa;
+    margin-left:8px;
+    color:#444;
+  }
+
+
+/* ===== Header weather (right) ===== */
+header.topbar{
+  position: relative;
+  text-align: center;
+  padding-right: 220px; /* 우측 날씨 영역 공간 확보 */
+}
+.topbar-title{ display: inline-block; }
+.header-weather{
+  position: absolute;
+  right: 18px;
+  top: 12px;
+  text-align: right;
+  font-size: 12px;
+  line-height: 1.25;
+  color: #fff;
+  opacity: .95;
+}
+.header-weather .current{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 14px;
+}
+.header-weather .current .loc{
+  font-weight: 700;
+  opacity: .9;
+  font-size: 12px;
+}
+.header-weather .daily{
+  margin-top: 4px;
+  display: grid;
+  gap: 2px;
+}
+.header-weather .row{
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 6px;
+  align-items: center;
+}
+.header-weather .row .date{ opacity: .9; }
+.header-weather .row .range{ opacity: .95; }
+.header-weather .row .pop{ opacity: .85; }
+@media (max-width: 920px){
+  header.topbar{ padding-right: 18px; }
+  .header-weather{
+    position: static;
+    margin-top: 8px;
+    color: #fff;
+    text-align: center;
+  }
+  .header-weather .current{ justify-content: center; }
+  .header-weather .row{ justify-content: center; grid-template-columns: auto auto auto; }
+}
+
+
+/* === 주변정보(호텔) 버튼 UI === */
+.muted{color:#777;font-size:13px;line-height:1.4}
+.hotelBlock{margin-top:12px;padding:12px;border:1px solid rgba(0,0,0,.08);border-radius:14px;background:#fafafa}
+.hotelName{font-weight:800;margin-bottom:8px}
+.btnRow{display:flex;flex-wrap:wrap;gap:8px}
+.btn.small{padding:8px 10px;font-size:13px;border-radius:12px}
+
+</style>
+</head>
+
+<body>
+<header class="topbar">
+  <div class="topbar-title">
+    🇭🇰 홍콩 가족여행 웹앱
+    <div class="sub">2/15–2/17 · 부부+아이 · 유모차/휴식 동선</div>
+  </div>
+  <div id="headerWeather" class="header-weather" aria-label="날씨"></div>
+</header>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="wrap">
+  <!-- ✅ 편집 모드 툴바 -->
+  
+
+  <!-- ✅ 콘텐츠 -->
+  <div id="contentRoot"></div>
+
 <div id="toolbar" class="toolbar">
     <label class="edit-toggle">
       <input type="checkbox" id="editModeToggle" />
@@ -14,8 +265,6 @@
     <button id="exportBtn" class="btn btn-ghost">내보내기</button>
 </div>
 
-  <!-- ✅ 콘텐츠 -->
-  <div id="contentRoot"></div>
 </div>
 
 <script>
@@ -303,6 +552,8 @@ const editToggle = document.getElementById("editModeToggle");
 const addBtn = document.getElementById("addItemBtn");
 const resetBtn = document.getElementById("resetBtn");
 const exportBtn = document.getElementById("exportBtn");
+const importFile = document.getElementById("importFile");
+
 /** =========================
  *  4) 렌더링
  *  ========================= */
@@ -473,6 +724,24 @@ exportBtn.addEventListener("click", ()=>{
   a.click();
   URL.revokeObjectURL(a.href);
 });
+
+if(importFile) importFile.addEventListener("change", async ()=>{
+  const file = importFile.files?.[0];
+  if(!file) return;
+  const text = await file.text();
+  try{
+    const obj = JSON.parse(text);
+    data = obj;
+    saveData(data);
+    render();
+    alert("가져오기 완료!");
+  }catch{
+    alert("JSON 형식이 올바르지 않아요. 내보내기 파일을 그대로 가져와 주세요.");
+  }finally{
+    importFile.value = "";
+  }
+});
+
 /** =========================
  *  7) 필수정보 렌더
  *  ========================= */
@@ -532,7 +801,38 @@ function renderInfo(){
         • 이동 일정은 출발지/도착지를 적으면 <b>지도 열기</b> 버튼이 자동으로 생김
       </div>
     </div>
-  `;
+  
+    <details>
+      <summary>🏨 호텔 주변 (관광/쇼핑/병원)</summary>
+      <div class="info">
+        <div class="muted">버튼을 누르면 구글맵에서 ‘숙소 주변’ 검색이 바로 열려요.</div>
+
+        <div class="hotelBlock">
+          <div class="hotelName">2/15 숙소: The Ritz-Carlton, Hong Kong (ICC)</div>
+          <div class="btnRow">
+            <a class="btn small" target="_blank" href="${gmSearch('tourist attractions near The Ritz-Carlton, Hong Kong')}">관광</a>
+            <a class="btn small" target="_blank" href="${gmSearch('shopping mall near The Ritz-Carlton, Hong Kong')}">쇼핑몰</a>
+            <a class="btn small" target="_blank" href="${gmSearch('restaurant near The Ritz-Carlton, Hong Kong family')}">가족 식사</a>
+            <a class="btn small" target="_blank" href="${gmSearch('hospital near The Ritz-Carlton, Hong Kong')}">병원</a>
+            <a class="btn small" target="_blank" href="${gmSearch('pharmacy near The Ritz-Carlton, Hong Kong')}">약국</a>
+            <a class="btn small" target="_blank" href="${gmSearch('pediatric clinic near The Ritz-Carlton, Hong Kong')}">소아과</a>
+          </div>
+        </div>
+
+        <div class="hotelBlock">
+          <div class="hotelName">2/16 숙소: Hong Kong Disneyland Hotel (Disneyland Resort)</div>
+          <div class="btnRow">
+            <a class="btn small" target="_blank" href="${gmSearch('tourist attractions near Hong Kong Disneyland Hotel')}">관광</a>
+            <a class="btn small" target="_blank" href="${gmSearch('shopping near Hong Kong Disneyland Hotel')}">쇼핑</a>
+            <a class="btn small" target="_blank" href="${gmSearch('restaurant near Hong Kong Disneyland Hotel family')}">가족 식사</a>
+            <a class="btn small" target="_blank" href="${gmSearch('hospital near Hong Kong Disneyland Hotel')}">병원</a>
+            <a class="btn small" target="_blank" href="${gmSearch('pharmacy near Hong Kong Disneyland Hotel')}">약국</a>
+            <a class="btn small" target="_blank" href="${gmSearch('pediatric clinic near Hong Kong Disneyland Hotel')}">소아과</a>
+          </div>
+        </div>
+      </div>
+    </details>
+`;
 }
 
 /** =========================
@@ -641,270 +941,6 @@ render();
 </script>
 </body>
 </html>
-        <div class="info-card">
-          <h3>🏨 호텔 주변 (가족/아이 동선 기준)</h3>
-          <div class="info-grid">
-            <div>
-              <h4>2/15 숙소: The Ritz-Carlton, Hong Kong (ICC)</h4>
-              <ul>
-                <li><a class="link" target="_blank" rel="noopener" href="${gmSearch('The Ritz-Carlton, Hong Kong')}">호텔 위치(구글맵)</a></li>
-                <li><a class="link" target="_blank" rel="noopener" href="${gmSearch('Elements Mall Hong Kong')}">Elements 쇼핑몰(실내·유모차 OK)</a></li>
-                <li><a class="link" target="_blank" rel="noopener" href="${gmSearch('Hong Kong Palace Museum')}">Hong Kong Palace Museum(가까운 박물관)</a></li>
-                <li><a class="link" target="_blank" rel="noopener" href="${gmSearch('West Kowloon Cultural District')}">West Kowloon Cultural District(산책/야외)</a></li>
-                <li><a class="link" target="_blank" rel="noopener" href="${gmSearch('St Paul\'s Hospital Hong Kong')}">근처 병원(예: St. Paul\'s Hospital 검색)</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4>2/16 숙소: Hong Kong Disneyland Hotel / Disney Explorers Lodge</h4>
-              <ul>
-                <li><a class="link" target="_blank" rel="noopener" href="${gmSearch('Hong Kong Disneyland Hotel')}">디즈니랜드 호텔 위치(구글맵)</a></li>
-                <li><a class="link" target="_blank" rel="noopener" href="${gmSearch('Disney Explorers Lodge')}">Disney Explorers Lodge(구글맵)</a></li>
-                <li><a class="link" target="_blank" rel="noopener" href="${gmSearch('Inspiration Lake Hong Kong Disneyland')}">Inspiration Lake(산책/휴식)</a></li>
-                <li><a class="link" target="_blank" rel="noopener" href="${gmSearch('Citygate Outlets Tung Chung')}">Citygate Outlets(가까운 아울렛)</a></li>
-                <li><a class="link" target="_blank" rel="noopener" href="${gmSearch('North Lantau Hospital')}">근처 병원(예: North Lantau Hospital)</a></li>
-              </ul>
-              <p class="muted" style="margin-top:8px;">※ 2/16 숙소는 “디즈니랜드 롯지”라고 하셨으니, 실제 예약 호텔(디즈니랜드 호텔/익스플로러스 롯지 등)만 하나로 확정해두면 동선 표기가 더 깔끔해져.</p>
-            </div>
-          </div>
-        </div>
+// Google Maps: 검색 링크 생성 (API key 불필요)
+const gmSearch = (q) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 
-
-"ko">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>홍콩 가족여행</title>
-
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="default" />
-
-<style>
-  :root{
-    --bg:#f5f6f8;
-    --card:#fff;
-    --text:#111;
-    --muted:#666;
-    --line:#e7e7e7;
-  }
-  body{
-    margin:0;
-    font-family:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
-    background:var(--bg);
-    color:var(--text);
-  }
-  header{
-    background:#111;
-    color:#fff;
-    padding:14px 14px 10px;
-    text-align:center;
-    font-weight:800;
-    letter-spacing:-0.2px;
-  }
-  header .sub{
-    font-weight:600;
-    opacity:.85;
-    font-size:12px;
-    margin-top:6px;
-  }
-
-  .tabs{
-    display:flex;
-    background:#fff;
-    border-bottom:1px solid #ddd;
-    position:sticky;
-    top:0;
-    z-index:10;
-    overflow:auto;
-  }
-  .tabs button{
-    flex:1;
-    min-width:90px;
-    padding:12px 10px;
-    border:none;
-    background:none;
-    font-size:14px;
-    cursor:pointer;
-    white-space:nowrap;
-  }
-  .tabs button.active{
-    border-bottom:3px solid #111;
-    font-weight:800;
-  }
-
-  .wrap{ padding:14px; max-width:920px; margin:0 auto; }
-  .toolbar{
-    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-    padding:10px 0; margin:2px 0 12px;
-  }
-  .edit-toggle{
-    display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none;
-    background:#fff; border:1px solid var(--line); border-radius:999px;
-    padding:8px 12px;
-  }
-  .btn{
-    padding:8px 12px; border-radius:10px; border:1px solid #ddd;
-    background:#111; color:#fff; cursor:pointer;
-  }
-  .btn:disabled{ opacity:.4; cursor:not-allowed; }
-  .btn-ghost{ background:#fff; color:#111; }
-
-  .card{
-    background:var(--card);
-    border-radius:14px;
-    padding:12px;
-    margin:12px 0;
-    border:1px solid #eee;
-  }
-  .card-header{
-    display:flex;
-    justify-content:space-between;
-    gap:10px;
-    align-items:flex-start;
-  }
-  .time{ font-weight:900; margin-bottom:6px; }
-  .title{ font-weight:800; margin-top:2px; }
-  .tag{
-    font-size:12px;
-    padding:4px 8px;
-    border-radius:999px;
-    border:1px solid #eee;
-    color:#333;
-    background:#fafafa;
-    flex:0 0 auto;
-  }
-  .meta{
-    color:var(--muted);
-    font-size:13px;
-    margin-top:6px;
-    line-height:1.45;
-  }
-  .map-btn{
-    display:inline-block;
-    margin-top:10px;
-    padding:9px 12px;
-    border-radius:12px;
-    background:#111;
-    color:#fff;
-    text-decoration:none;
-    font-size:13px;
-  }
-
-  /* 편집 폼 */
-  .edit-row{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
-  .edit-row input, .edit-row textarea, .edit-row select{
-    width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;
-    font-size:14px;
-    background:#fff;
-  }
-  .edit-actions{ display:flex; gap:8px; margin-top:10px; }
-  .small-btn{ padding:8px 10px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; }
-  .small-btn.danger{ border-color:#ffb3b3; color:#b30000; }
-  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; }
-  @media (max-width:720px){ .grid2{ grid-template-columns:1fr; } }
-
-  /* 정보 섹션 */
-  details{
-    background:#fff;
-    border:1px solid #eee;
-    border-radius:14px;
-    padding:10px 12px;
-    margin:12px 0;
-  }
-  summary{
-    cursor:pointer;
-    font-weight:800;
-    list-style:none;
-  }
-  summary::-webkit-details-marker{ display:none; }
-  .info{
-    margin-top:10px;
-    color:#333;
-    line-height:1.55;
-    font-size:14px;
-  }
-  .info ul{ margin:8px 0 0 18px; }
-  .pill{
-    display:inline-block;
-    font-size:12px;
-    padding:4px 8px;
-    border-radius:999px;
-    border:1px solid #eee;
-    background:#fafafa;
-    margin-left:8px;
-    color:#444;
-  }
-
-
-/* ===== Header weather (right) ===== */
-header.topbar{
-  position: relative;
-  text-align: center;
-  padding-right: 220px; /* 우측 날씨 영역 공간 확보 */
-}
-.topbar-title{ display: inline-block; }
-.header-weather{
-  position: absolute;
-  right: 18px;
-  top: 12px;
-  text-align: right;
-  font-size: 12px;
-  line-height: 1.25;
-  color: #fff;
-  opacity: .95;
-}
-.header-weather .current{
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
-  font-weight: 800;
-  font-size: 14px;
-}
-.header-weather .current .loc{
-  font-weight: 700;
-  opacity: .9;
-  font-size: 12px;
-}
-.header-weather .daily{
-  margin-top: 4px;
-  display: grid;
-  gap: 2px;
-}
-.header-weather .row{
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 6px;
-  align-items: center;
-}
-.header-weather .row .date{ opacity: .9; }
-.header-weather .row .range{ opacity: .95; }
-.header-weather .row .pop{ opacity: .85; }
-@media (max-width: 920px){
-  header.topbar{ padding-right: 18px; }
-  .header-weather{
-    position: static;
-    margin-top: 8px;
-    color: #fff;
-    text-align: center;
-  }
-  .header-weather .current{ justify-content: center; }
-  .header-weather .row{ justify-content: center; grid-template-columns: auto auto auto; }
-}
-
-</style>
-</head>
-
-<body>
-<header class="topbar">
-  <div class="topbar-title">
-    🇭🇰 홍콩 가족여행 웹앱
-    <div class="sub">2/15–2/17 · 부부+아이 · 유모차/휴식 동선</div>
-  </div>
-  <div id="headerWeather" class="header-weather" aria-label="날씨"></div>
-</header>
-
-<div class="tabs" id="tabs"></div>
-
-<div class="wrap">
-  <!-- ✅ 편집 모드 툴바 -->
-  
