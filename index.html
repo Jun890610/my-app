@@ -164,38 +164,25 @@
     color:#444;
   }
 
-/* Weather */
-.weather{
-  margin: 14px 16px 0;
-  padding: 14px 14px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: rgba(255,255,255,0.75);
-  backdrop-filter: blur(10px);
-}
-.weather__head{
-  display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
-  margin-bottom:10px;
-}
-.weather__title{font-weight:800; letter-spacing:-0.02em;}
-.weather__meta{font-size:12px; color:var(--muted);}
-.weather__grid{
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
-  gap:10px;
-}
-.weather__card{
-  border:1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 10px;
-  background: #fff;
-}
-.weather__date{font-weight:700; font-size:13px; margin-bottom:6px;}
-.weather__row{display:flex; justify-content:space-between; font-size:13px; margin:3px 0;}
-.weather__desc{font-size:12px; color:var(--muted); margin-top:6px;}
-@media (max-width: 720px){
-  .weather__grid{grid-template-columns: 1fr;}
-}
+/* ===== Weather UI ===== */
+.modal.hidden{display:none;}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999;}
+.modal-card{width:min(720px,100%);background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.22);overflow:hidden;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #eee;gap:12px;}
+.modal-title{font-weight:800;font-size:18px;}
+.modal-sub{font-size:12px;color:#666;margin-top:2px;}
+.modal-body{padding:14px 16px;}
+.weather-now{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 12px;border:1px solid #eee;border-radius:14px;background:#fafafa;margin-bottom:12px;}
+.weather-chip{display:inline-flex;gap:6px;align-items:center;padding:7px 10px;border-radius:999px;background:#fff;border:1px solid #e8e8e8;font-size:13px;}
+.weather-list-title{font-weight:700;margin:10px 0 8px;}
+.weather-list{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:8px;}
+@media (min-width:640px){.weather-list{grid-template-columns:repeat(2,minmax(0,1fr));}}
+.weather-day{border:1px solid #eee;border-radius:14px;padding:10px 12px;background:#fff;display:flex;flex-direction:column;gap:6px;}
+.weather-day .d{font-weight:800;}
+.weather-note{font-size:12px;color:#666;margin-top:10px;}
+.day-weather-banner{margin:10px 0 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.day-weather-banner .label{font-weight:800;}
+
 </style>
 </head>
 
@@ -204,15 +191,6 @@
   🇭🇰 홍콩 가족여행 웹앱
   <div class="sub">2/15–2/17 · 부부+아이 · 유모차/휴식 동선</div>
 </header>
-
-  <section class="weather" id="weatherBox" aria-label="날씨">
-    <div class="weather__head">
-      <div class="weather__title">날씨 (홍콩)</div>
-      <div class="weather__meta" id="weatherMeta">불러오는 중…</div>
-    </div>
-    <div class="weather__grid" id="weatherGrid"></div>
-  </section>
-
 
 <div class="tabs" id="tabs"></div>
 
@@ -226,6 +204,8 @@
 
     <button id="addItemBtn" class="btn" disabled>+ 일정 추가</button>
     <button id="resetBtn" class="btn btn-ghost" disabled>초기화</button>
+
+    <button id="weatherBtn" class="btn btn-ghost">날씨</button>
 
     <button id="exportBtn" class="btn btn-ghost">내보내기</button>
     <label class="btn btn-ghost" for="importFile">가져오기</label>
@@ -491,29 +471,13 @@ function saveData(d){
  *  2) 구글맵 링크 생성
  *  ========================= */
 function mapsUrl(item){
-  // 1) 명시적 mapQuery(장소 검색) 우선
-  if(item.mapQuery && String(item.mapQuery).trim()){
-    const q = encodeURIComponent(String(item.mapQuery).trim());
-    return `https://www.google.com/maps/search/?api=1&query=${q}`;
-  }
-  // 2) 출발/도착이 있으면 길찾기
-  if(item.from && item.to){
-    const from = encodeURIComponent(item.from);
-    const to = encodeURIComponent(item.to);
-    const mode =
-      item.transport === "walking" ? "walking" :
-      item.transport === "driving" ? "driving" :
-      item.transport === "transit" ? "transit" : "";
-    return mode
-      ? `https://www.google.com/maps/dir/${from}/${to}/?travelmode=${mode}`
-      : `https://www.google.com/maps/dir/${from}/${to}/`;
-  }
-  // 3) 도착지만 있으면 장소 검색
-  if(item.to){
-    const q = encodeURIComponent(item.to);
-    return `https://www.google.com/maps/search/?api=1&query=${q}`;
-  }
-  return "";
+  if(!item.from || !item.to) return "";
+  const from = encodeURIComponent(item.from);
+  const to = encodeURIComponent(item.to);
+  if(item.transport === "walking") return `https://www.google.com/maps/dir/${from}/${to}/?travelmode=walking`;
+  if(item.transport === "driving") return `https://www.google.com/maps/dir/${from}/${to}/?travelmode=driving`;
+  if(item.transport === "transit") return `https://www.google.com/maps/dir/${from}/${to}/?travelmode=transit`;
+  return `https://www.google.com/maps/dir/${from}/${to}/`;
 }
 function labelTransport(t){
   if(t==="walking") return "도보";
@@ -553,7 +517,7 @@ function renderTabs(){
     btn.addEventListener("click", ()=>{
       activeTab = btn.dataset.tab;
       render();
-updateWeather();
+initWeatherUI();
     });
   });
 }
@@ -798,21 +762,216 @@ function escapeHtml(str){
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   }[s]));
 }
-
-function formatNotes(txt){
-  if(!txt) return "";
-  // HTML escape 후 줄바꿈을 <br>로 변환
-  return escapeHtml(String(txt)).replace(/
-/g, "<br>");
-}
-
-
 function escapeAttr(str){
   return escapeHtml(str).replace(/\n/g," ");
 }
 
 /** 최초 렌더 */
 render();
+
+/** =========================
+ *  🌤️ 날씨 (Open‑Meteo, API Key 불필요)
+ *  ========================= */
+const WEATHER = {
+  lat: 22.3193,
+  lon: 114.1694,
+  tz: "Asia/Hong_Kong",
+  // 탭(2/15,2/16,2/17)을 실제 날짜(올해 or 내년)로 매핑
+  resolveTripDates() {
+    const now = new Date();
+    let year = now.getFullYear();
+    // 2월 15일이 이미 지나갔으면 내년으로
+    const base = new Date(year, 1, 15);
+    if (base.getTime() < (now.getTime() - 24*60*60*1000)) year += 1;
+    const map = {};
+    ["2/15","2/16","2/17"].forEach((md, i) => {
+      const d = new Date(year, 1, 15 + i);
+      const iso = d.toISOString().slice(0,10);
+      map[md] = iso;
+    });
+    return {year, map};
+  },
+  wmoToText(code){
+    const m = {
+      0:"맑음",1:"대체로 맑음",2:"구름 조금",3:"흐림",
+      45:"안개",48:"서리 안개",
+      51:"이슬비(약)",53:"이슬비(중)",55:"이슬비(강)",
+      61:"비(약)",63:"비(중)",65:"비(강)",
+      71:"눈(약)",73:"눈(중)",75:"눈(강)",
+      80:"소나기(약)",81:"소나기(중)",82:"소나기(강)",
+      95:"뇌우",96:"뇌우(우박)",99:"강한 뇌우(우박)"
+    };
+    return m[code] ?? `날씨코드 ${code}`;
+  },
+  async fetch(){
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}`
+      + `&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`
+      + `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code`
+      + `&timezone=${encodeURIComponent(this.tz)}`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error("날씨 API 실패");
+    return res.json();
+  }
+};
+
+let weatherCache = null; window.weatherCache = weatherCache;
+
+function formatKDate(iso){
+  const [y,m,d]=iso.split("-").map(Number);
+  return `${m}/${d}`;
+}
+
+function renderWeatherModal(api){
+  const nowEl = document.getElementById("weatherNow");
+  const listEl = document.getElementById("weatherList");
+  if(!nowEl || !listEl) return;
+
+  const c = api.current;
+  const chips = [
+    `현재 ${c.temperature_2m}°C`,
+    `체감 ${c.apparent_temperature}°C`,
+    `강수 ${c.precipitation}mm`,
+    `바람 ${c.wind_speed_10m}m/s`,
+    WEATHER.wmoToText(c.weather_code)
+  ].map(t=>`<span class="weather-chip">${escapeHtml(t)}</span>`).join("");
+  nowEl.innerHTML = chips;
+
+  const t = api.daily.time;
+  const max = api.daily.temperature_2m_max;
+  const min = api.daily.temperature_2m_min;
+  const pop = api.daily.precipitation_probability_max;
+  const code = api.daily.weather_code;
+
+  let html = "";
+  for(let i=0;i<t.length;i++){
+    html += `
+      <div class="weather-day">
+        <div class="d">${formatKDate(t[i])} <span style="font-weight:600;color:#666">(${t[i]})</span></div>
+        <div>${escapeHtml(WEATHER.wmoToText(code[i]))}</div>
+        <div>최고 ${max[i]}° / 최저 ${min[i]}°</div>
+        <div>강수확률 ${pop[i]}%</div>
+      </div>`;
+  }
+  listEl.innerHTML = html;
+}
+
+function getDayForecast(api, iso){
+  const t = api.daily.time;
+  const i = t.indexOf(iso);
+  if(i === -1) return null;
+  return {
+    iso,
+    text: WEATHER.wmoToText(api.daily.weather_code[i]),
+    max: api.daily.temperature_2m_max[i],
+    min: api.daily.temperature_2m_min[i],
+    pop: api.daily.precipitation_probability_max[i]
+  };
+}
+
+// 각 날짜 탭 상단에 "날씨 배너"를 버튼/칩 형태로 표시
+function renderDayWeatherBanner(api){
+  const {map} = WEATHER.resolveTripDates();
+  const iso = map[activeTab];
+  const f = iso ? getDayForecast(api, iso) : null;
+
+  // 기존 배너 제거
+  const old = document.getElementById("dayWeatherBanner");
+  if(old) old.remove();
+
+  if(!f) return;
+
+  const banner = document.createElement("div");
+  banner.id = "dayWeatherBanner";
+  banner.className = "day-weather-banner";
+  banner.innerHTML = `
+    <span class="label">오늘(${activeTab}) 날씨</span>
+    <span class="weather-chip">${escapeHtml(f.text)}</span>
+    <span class="weather-chip">최고 ${f.max}° / 최저 ${f.min}°</span>
+    <span class="weather-chip">강수확률 ${f.pop}%</span>
+    <button id="openWeatherFromBanner" class="btn btn-ghost">자세히</button>
+  `;
+
+  // contentRoot 맨 위에 삽입
+  if(contentRoot) contentRoot.prepend(banner);
+
+  const btn = document.getElementById("openWeatherFromBanner");
+  if(btn){
+    btn.addEventListener("click", ()=> openWeatherModal());
+  }
+}
+
+async function ensureWeather(){
+  if(weatherCache) return weatherCache;
+  weatherCache = await WEATHER.fetch(); window.weatherCache = weatherCache;
+  return weatherCache;
+}
+
+function openWeatherModal(){
+  const modal = document.getElementById("weatherModal");
+  if(!modal) return;
+  modal.classList.remove("hidden");
+}
+
+function closeWeatherModal(){
+  const modal = document.getElementById("weatherModal");
+  if(!modal) return;
+  modal.classList.add("hidden");
+}
+
+async function initWeatherUI(){
+  const btn = document.getElementById("weatherBtn");
+  const closeBtn = document.getElementById("weatherClose");
+  const modal = document.getElementById("weatherModal");
+
+  if(btn){
+    btn.addEventListener("click", async ()=>{
+      try{
+        const api = await ensureWeather();
+        renderWeatherModal(api);
+        renderDayWeatherBanner(api);
+        openWeatherModal();
+      }catch(e){
+        alert("날씨 정보를 불러오지 못했어요. 네트워크를 확인해 주세요.");
+        console.error(e);
+      }
+    });
+  }
+  if(closeBtn) closeBtn.addEventListener("click", closeWeatherModal);
+  if(modal){
+    modal.addEventListener("click", (e)=>{
+      if(e.target === modal) closeWeatherModal();
+    });
+  }
+
+  // 첫 로딩 시에도 배너는 시도(네트워크 실패해도 앱은 동작)
+  try{
+    const api = await ensureWeather();
+    renderDayWeatherBanner(api);
+  }catch(e){
+    console.warn("weather preload failed", e);
+  }
+}
+
 </script>
+
+<!-- 🌤️ 날씨 모달 -->
+<div id="weatherModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="weatherTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div id="weatherTitle" class="modal-title">홍콩 날씨</div>
+        <div class="modal-sub">Open‑Meteo 기반 · 16일 예보</div>
+      </div>
+      <button id="weatherClose" class="btn btn-ghost">닫기</button>
+    </div>
+    <div class="modal-body">
+      <div id="weatherNow" class="weather-now">불러오는 중…</div>
+      <div class="weather-list-title">날짜별 예보</div>
+      <div id="weatherList" class="weather-list"></div>
+      <div class="weather-note">* 예보는 바뀔 수 있어요. 출발 전/당일에 다시 확인하세요.</div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
