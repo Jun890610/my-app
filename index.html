@@ -1,204 +1,818 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>홍콩 가족여행</title>
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
 <style>
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
-  background: #f5f6f8;
+  :root{
+    --bg:#f5f6f8;
+    --card:#fff;
+    --text:#111;
+    --muted:#666;
+    --line:#e7e7e7;
+  }
+  body{
+    margin:0;
+    font-family:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  header{
+    background:#111;
+    color:#fff;
+    padding:14px 14px 10px;
+    text-align:center;
+    font-weight:800;
+    letter-spacing:-0.2px;
+  }
+  header .sub{
+    font-weight:600;
+    opacity:.85;
+    font-size:12px;
+    margin-top:6px;
+  }
+
+  .tabs{
+    display:flex;
+    background:#fff;
+    border-bottom:1px solid #ddd;
+    position:sticky;
+    top:0;
+    z-index:10;
+    overflow:auto;
+  }
+  .tabs button{
+    flex:1;
+    min-width:90px;
+    padding:12px 10px;
+    border:none;
+    background:none;
+    font-size:14px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .tabs button.active{
+    border-bottom:3px solid #111;
+    font-weight:800;
+  }
+
+  .wrap{ padding:14px; max-width:920px; margin:0 auto; }
+  .toolbar{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    padding:10px 0; margin:2px 0 12px;
+  }
+  .edit-toggle{
+    display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none;
+    background:#fff; border:1px solid var(--line); border-radius:999px;
+    padding:8px 12px;
+  }
+  .btn{
+    padding:8px 12px; border-radius:10px; border:1px solid #ddd;
+    background:#111; color:#fff; cursor:pointer;
+  }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .btn-ghost{ background:#fff; color:#111; }
+
+  .card{
+    background:var(--card);
+    border-radius:14px;
+    padding:12px;
+    margin:12px 0;
+    border:1px solid #eee;
+  }
+  .card-header{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:flex-start;
+  }
+  .time{ font-weight:900; margin-bottom:6px; }
+  .title{ font-weight:800; margin-top:2px; }
+  .tag{
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid #eee;
+    color:#333;
+    background:#fafafa;
+    flex:0 0 auto;
+  }
+  .meta{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:6px;
+    line-height:1.45;
+  }
+  .map-btn{
+    display:inline-block;
+    margin-top:10px;
+    padding:9px 12px;
+    border-radius:12px;
+    background:#111;
+    color:#fff;
+    text-decoration:none;
+    font-size:13px;
+  }
+
+  /* 편집 폼 */
+  .edit-row{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+  .edit-row input, .edit-row textarea, .edit-row select{
+    width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;
+    font-size:14px;
+    background:#fff;
+  }
+  .edit-actions{ display:flex; gap:8px; margin-top:10px; }
+  .small-btn{ padding:8px 10px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; }
+  .small-btn.danger{ border-color:#ffb3b3; color:#b30000; }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; }
+  @media (max-width:720px){ .grid2{ grid-template-columns:1fr; } }
+
+  /* 정보 섹션 */
+  details{
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:14px;
+    padding:10px 12px;
+    margin:12px 0;
+  }
+  summary{
+    cursor:pointer;
+    font-weight:800;
+    list-style:none;
+  }
+  summary::-webkit-details-marker{ display:none; }
+  .info{
+    margin-top:10px;
+    color:#333;
+    line-height:1.55;
+    font-size:14px;
+  }
+  .info ul{ margin:8px 0 0 18px; }
+  .pill{
+    display:inline-block;
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:999px;
+    border:1px solid #eee;
+    background:#fafafa;
+    margin-left:8px;
+    color:#444;
+  }
+
+/* Weather */
+.weather{
+  margin: 14px 16px 0;
+  padding: 14px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(10px);
 }
-header {
-  background: #111;
-  color: #fff;
-  padding: 14px;
-  text-align: center;
-  font-weight: 700;
+.weather__head{
+  display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
+  margin-bottom:10px;
 }
-.tabs {
-  display: flex;
-  background: #fff;
-  border-bottom: 1px solid #ddd;
+.weather__title{font-weight:800; letter-spacing:-0.02em;}
+.weather__meta{font-size:12px; color:var(--muted);}
+.weather__grid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap:10px;
 }
-.tabs button {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  background: none;
-  font-size: 14px;
-}
-.tabs button.active {
-  border-bottom: 3px solid #111;
-  font-weight: bold;
-}
-.section {
-  display: none;
-  padding: 14px;
-}
-.section.active {
-  display: block;
-}
-.card {
-  background: #fff;
+.weather__card{
+  border:1px solid var(--border);
   border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 10px;
+  padding: 10px 10px;
+  background: #fff;
 }
-.time {
-  font-weight: bold;
-  margin-bottom: 6px;
+.weather__date{font-weight:700; font-size:13px; margin-bottom:6px;}
+.weather__row{display:flex; justify-content:space-between; font-size:13px; margin:3px 0;}
+.weather__desc{font-size:12px; color:var(--muted); margin-top:6px;}
+@media (max-width: 720px){
+  .weather__grid{grid-template-columns: 1fr;}
 }
-.tag {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 6px;
-}
-
-.weather-card .weather-meta{
-  margin-top:6px;
-  line-height:1.35;
-  color:#222;
-  font-size:14px;
-}
-.weather-card .weather-small{
-  color:#555;
-  font-size:12px;
-  margin-top:6px;
-}
-
 </style>
 </head>
 
 <body>
+<header>
+  🇭🇰 홍콩 가족여행 웹앱
+  <div class="sub">2/15–2/17 · 부부+아이 · 유모차/휴식 동선</div>
+</header>
 
-<header>🇭🇰 홍콩 가족여행 웹앱</header>
+  <section class="weather" id="weatherBox" aria-label="날씨">
+    <div class="weather__head">
+      <div class="weather__title">날씨 (홍콩)</div>
+      <div class="weather__meta" id="weatherMeta">불러오는 중…</div>
+    </div>
+    <div class="weather__grid" id="weatherGrid"></div>
+  </section>
 
-<div class="tabs">
-  <button class="active" onclick="show(0)">2/15</button>
-  <button onclick="show(1)">2/16</button>
-  <button onclick="show(2)">☔ 우천</button>
-  <button onclick="show(3)">2/17</button>
-</div>
 
-<!-- 2/15 -->
-<div class="section active">
-  <div class="card"><div class="time">14:30–15:30</div><div class="tag">🚕 이동</div>공항 → 리츠칼튼 홍콩</div>
-  <div class="card"><div class="time">15:30–16:45</div><div class="tag">😴 낮잠</div>호텔 객실</div>
-  <div class="card"><div class="time">17:00–18:00</div><div class="tag">🍜 식사</div>Mak’s Noodle</div>
-  <div class="card"><div class="time">19:45–20:30</div><div class="tag">🍽 저녁</div>Crystal Jade</div>
-</div>
+<div class="tabs" id="tabs"></div>
 
-<!-- 2/16 정상 -->
-<div class="section">
-  <div class="card"><div class="time">10:00–10:25</div><div class="tag">🎠</div>it’s a small world</div>
-  <div class="card"><div class="time">10:35–11:00</div><div class="tag">🎠</div>Winnie the Pooh</div>
-  <div class="card"><div class="time">11:10–11:30</div><div class="tag">📸</div>캐릭터 미팅</div>
-  <div class="card"><div class="time">12:00–12:30</div><div class="tag">🍽</div>점심 (Main Street)</div>
-  <div class="card"><div class="time">12:30–15:00</div><div class="tag">😴 낮잠</div>호텔 객실</div>
-  <div class="card"><div class="time">15:15–15:45</div><div class="tag">🎭</div>Lion King 쇼</div>
-  <div class="card"><div class="time">16:45–17:20</div><div class="tag">🚤</div>Jungle River Cruise</div>
-</div>
+<div class="wrap">
+  <!-- ✅ 편집 모드 툴바 -->
+  <div id="toolbar" class="toolbar">
+    <label class="edit-toggle">
+      <input type="checkbox" id="editModeToggle" />
+      <span>스케줄 편집 모드</span>
+    </label>
 
-<!-- 우천 -->
-<div class="section">
-  <div class="card"><div class="time">10:00–10:40</div>Lion King 쇼</div>
-  <div class="card"><div class="time">10:50–11:20</div>it’s a small world</div>
-  <div class="card"><div class="time">11:30–12:00</div>Animation Academy</div>
-  <div class="card"><div class="time">15:15–16:00</div>실내 캐릭터 미팅</div>
-</div>
+    <button id="addItemBtn" class="btn" disabled>+ 일정 추가</button>
+    <button id="resetBtn" class="btn btn-ghost" disabled>초기화</button>
 
-<!-- 2/17 -->
-<div class="section">
-  <div class="card"><div class="time">09:00–09:30</div>리조트 산책</div>
-  <div class="card"><div class="time">10:00–10:40</div>🚕 디즈니 → 공항</div>
-  <div class="card"><div class="time">14:40</div>✈️ 하노이 출발</div>
+    <button id="exportBtn" class="btn btn-ghost">내보내기</button>
+    <label class="btn btn-ghost" for="importFile">가져오기</label>
+    <input id="importFile" type="file" accept="application/json" style="display:none" />
+  </div>
+
+  <!-- ✅ 콘텐츠 -->
+  <div id="contentRoot"></div>
 </div>
 
 <script>
-function show(i){
-  document.querySelectorAll('.tabs button').forEach((b,idx)=>b.classList.toggle('active',idx===i));
-  document.querySelectorAll('.section').forEach((s,idx)=>s.classList.toggle('active',idx===i));
-  loadWeather(i);
-}
-
-const WEATHER_LOCATIONS = [
-  { name: "침사추이/리츠칼튼(ICC)", lat: 22.3034, lon: 114.1601 }, // ICC 쪽
-  { name: "홍콩 디즈니랜드", lat: 22.3129, lon: 114.0413 },
-  { name: "우천 대안(침사추이 중심)", lat: 22.2969, lon: 114.1722 },
-  { name: "홍콩(센트럴)", lat: 22.2819, lon: 114.1582 }
-];
-
-function wcText(code){
-  const map = {
-    0:"맑음",1:"대체로 맑음",2:"부분적으로 흐림",3:"흐림",
-    45:"안개",48:"서리 안개",
-    51:"이슬비(약)",53:"이슬비(보통)",55:"이슬비(강)",
-    61:"비(약)",63:"비(보통)",65:"비(강)",
-    71:"눈(약)",73:"눈(보통)",75:"눈(강)",
-    80:"소나기(약)",81:"소나기(보통)",82:"소나기(강)",
-    95:"뇌우",96:"뇌우(우박 가능)",99:"뇌우(강/우박)"
-  };
-  return map[code] ?? `날씨코드 ${code}`;
-}
-
-async function loadWeather(i){
-  const el = document.querySelector(`#weather-card-${i} .weather-meta`);
-  if(!el) return;
-  el.textContent = "불러오는 중…";
-
-  const loc = WEATHER_LOCATIONS[i] ?? WEATHER_LOCATIONS[0];
-  const url =
-    `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}` +
-    `&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m` +
-    `&hourly=precipitation_probability&forecast_days=1&timezone=Asia%2FHong_Kong`;
-
-  try{
-    const r = await fetch(url, { cache: "no-store" });
-    if(!r.ok) throw new Error("HTTP " + r.status);
-    const data = await r.json();
-
-    const c = data.current;
-    const temp = c.temperature_2m;
-    const feels = c.apparent_temperature;
-    const wind = c.wind_speed_10m;
-    const pr = c.precipitation;
-    const desc = wcText(c.weather_code);
-
-    // 현재시간에 가장 가까운 강수확률(시간대)
-    let pop = null;
-    if(data.hourly && data.hourly.time && data.hourly.precipitation_probability){
-      const now = new Date(data.current.time).getTime();
-      let bestIdx = 0, bestDiff = Infinity;
-      data.hourly.time.forEach((t, idx)=>{
-        const diff = Math.abs(new Date(t).getTime() - now);
-        if(diff < bestDiff){ bestDiff = diff; bestIdx = idx; }
-      });
-      pop = data.hourly.precipitation_probability[bestIdx];
+/** =========================
+ *  0) 데이터(초기값)
+ *  ========================= */
+const DEFAULT_DATA = {
+  "2/15": [
+    {
+      id: crypto.randomUUID(),
+      time: "13:30–14:30",
+      title: "홍콩 도착 · 입국 · 수하물 수령",
+      tag: "도착",
+      transport: "none",
+      from: "",
+      to: "",
+      notes: "eSIM 켜기/데이터 확인 · 공항 ATM 소액 인출(HKD) · 옥토퍼스 준비"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "14:30–15:30",
+      title: "공항 → 리츠칼튼 홍콩(ICC) 이동",
+      tag: "이동",
+      transport: "driving",
+      from: "Hong Kong International Airport",
+      to: "The Ritz-Carlton, Hong Kong",
+      notes: "아이 컨디션/짐 고려해 택시 추천 · 체크인 전 짐 보관 가능"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "15:30–16:45",
+      title: "호텔 휴식/아이 낮잠",
+      tag: "낮잠",
+      transport: "none",
+      from: "",
+      to: "",
+      notes: "저녁 일정 대비 체력 회복(중요)"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "17:00–18:00",
+      title: "Mak’s Noodle (완탕면/죽류 · 부담 적게)",
+      tag: "식사",
+      transport: "walking",
+      from: "The Ritz-Carlton, Hong Kong",
+      to: "Mak's Noodle, Tsim Sha Tsui",
+      notes: "도보 이동 · 결제: 카드/현금"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "18:15–19:00",
+      title: "Avenue of Stars 해변 산책 (유모차 OK)",
+      tag: "산책",
+      transport: "walking",
+      from: "Mak's Noodle, Tsim Sha Tsui",
+      to: "Avenue of Stars, Tsim Sha Tsui",
+      notes: "바람/기온 대비 겉옷"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "19:00–19:30",
+      title: "Star Ferry (짧고 재미있는 야경 체험)",
+      tag: "페리",
+      transport: "walking",
+      from: "Star Ferry Pier, Tsim Sha Tsui",
+      to: "Star Ferry Pier, Central",
+      notes: "결제: 옥토퍼스/현금 · 아이가 좋아함"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "19:45~",
+      title: "호텔 복귀 & 휴식 (내일 디즈니 대비)",
+      tag: "휴식",
+      transport: "none",
+      from: "",
+      to: "",
+      notes: "가능하면 조기 취침"
     }
+  ],
 
-    el.innerHTML =
-      `<b>${loc.name}</b><br>` +
-      `${desc} · ${temp}°C (체감 ${feels}°C)<br>` +
-      `강수 ${pr}mm` + (pop!==null ? ` · 강수확률 ${pop}%` : "") + `<br>` +
-      `바람 ${wind}km/h` +
-      `<div class="weather-small">업데이트: ${new Date(data.current.time).toLocaleString("ko-KR",{timeZone:"Asia/Hong_Kong"})} (홍콩시간)</div>`;
-  }catch(e){
-    el.innerHTML =
-      `날씨를 불러오지 못했어 😢<br>` +
-      `<span class="weather-small">배포된 Netlify 주소(https)에서 다시 확인해줘. (file:/// 로 열면 브라우저가 막을 수 있어)</span>`;
+  "2/16": [
+    {
+      id: crypto.randomUUID(),
+      time: "08:30–09:15",
+      title: "리츠칼튼 → 디즈니랜드 호텔(롯지) 이동",
+      tag: "이동",
+      transport: "driving",
+      from: "The Ritz-Carlton, Hong Kong",
+      to: "Hong Kong Disneyland Hotel",
+      notes: "택시 추천(아이+짐) · 체크인 전 짐 보관"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "09:30–11:30",
+      title: "디즈니 오전 골든타임 (대기 짧을 때)",
+      tag: "어트랙션",
+      transport: "walking",
+      from: "Hong Kong Disneyland Hotel",
+      to: "Hong Kong Disneyland Park",
+      notes: "추천: it's a small world → Pooh → Dumbo(상황 봐서) · 캐슬 사진"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "12:00–12:40",
+      title: "점심 (Main Street/실내 레스토랑)",
+      tag: "식사",
+      transport: "none",
+      from: "",
+      to: "",
+      notes: "아이 컨디션 보고 실내 선호"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "13:00–15:00",
+      title: "호텔 낮잠/휴식 (저녁 퍼레이드 체력 확보)",
+      tag: "낮잠",
+      transport: "walking",
+      from: "Hong Kong Disneyland Park",
+      to: "Hong Kong Disneyland Hotel",
+      notes: "유모차/도보 또는 셔틀"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "15:15–16:00",
+      title: "Lion King 쇼(실내) / 또는 캐릭터 미팅",
+      tag: "쇼",
+      transport: "walking",
+      from: "Hong Kong Disneyland Hotel",
+      to: "Hong Kong Disneyland Park",
+      notes: "날씨/아이 컨디션에 따라 유동적으로"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "16:45–17:20",
+      title: "Jungle River Cruise / 산책/간식",
+      tag: "어트랙션",
+      transport: "none",
+      from: "",
+      to: "",
+      notes: "대기 길면 퍼레이드 자리 선점으로 전환"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "18:30–19:30",
+      title: "저녁 (Explorer’s Club Restaurant 등)",
+      tag: "식사",
+      transport: "none",
+      from: "",
+      to: "",
+      notes: "야간쇼/불꽃 전 간단히"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "20:20–20:40",
+      title: "파크 → 호텔 복귀 (도보/셔틀)",
+      tag: "이동",
+      transport: "walking",
+      from: "Hong Kong Disneyland Park",
+      to: "Hong Kong Disneyland Hotel",
+      notes: "끝나면 바로 숙소로"
+    }
+  ],
+
+  "2/17": [
+    {
+      id: crypto.randomUUID(),
+      time: "09:00–09:30",
+      title: "리조트 산책/기념사진",
+      tag: "산책",
+      transport: "none",
+      from: "",
+      to: "",
+      notes: "체크아웃 준비"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "10:00–10:40",
+      title: "디즈니랜드 호텔 → 공항 이동",
+      tag: "이동",
+      transport: "driving",
+      from: "Hong Kong Disneyland Hotel",
+      to: "Hong Kong International Airport",
+      notes: "시간 여유 있게 출발"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "14:40",
+      title: "✈️ 출국",
+      tag: "출국",
+      transport: "none",
+      from: "",
+      to: "",
+      notes: "면세/식사/아이 휴식 고려"
+    }
+  ],
+
+  "☔ 우천": [
+    {
+      id: crypto.randomUUID(),
+      time: "10:00–10:40",
+      title: "Lion King 쇼(실내)",
+      tag: "실내",
+      transport: "none",
+      from: "",
+      to: "",
+      notes: "우천 시 우선 추천"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "10:50–11:20",
+      title: "it's a small world (실내/대기 짧음)",
+      tag: "실내",
+      transport: "none",
+      from: "",
+      to: "",
+      notes: "유모차 OK"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "11:30–12:00",
+      title: "Animation Academy / 실내 체험",
+      tag: "실내",
+      transport: "none",
+      from: "",
+      to: "",
+      notes: "아이 컨디션 따라 짧게"
+    },
+    {
+      id: crypto.randomUUID(),
+      time: "15:15–16:00",
+      title: "실내 캐릭터 미팅",
+      tag: "실내",
+      transport: "none",
+      from: "",
+      to: "",
+      notes: "비 올 때 만족도 높음"
+    }
+  ]
+};
+
+/** =========================
+ *  1) 저장/로드
+ *  ========================= */
+const STORAGE_KEY = "hk_trip_schedule_v2";
+function loadData(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return structuredClone(DEFAULT_DATA);
+  try{ return JSON.parse(raw); }catch{ return structuredClone(DEFAULT_DATA); }
+}
+function saveData(d){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+}
+
+/** =========================
+ *  2) 구글맵 링크 생성
+ *  ========================= */
+function mapsUrl(item){
+  // 1) 명시적 mapQuery(장소 검색) 우선
+  if(item.mapQuery && String(item.mapQuery).trim()){
+    const q = encodeURIComponent(String(item.mapQuery).trim());
+    return `https://www.google.com/maps/search/?api=1&query=${q}`;
+  }
+  // 2) 출발/도착이 있으면 길찾기
+  if(item.from && item.to){
+    const from = encodeURIComponent(item.from);
+    const to = encodeURIComponent(item.to);
+    const mode =
+      item.transport === "walking" ? "walking" :
+      item.transport === "driving" ? "driving" :
+      item.transport === "transit" ? "transit" : "";
+    return mode
+      ? `https://www.google.com/maps/dir/${from}/${to}/?travelmode=${mode}`
+      : `https://www.google.com/maps/dir/${from}/${to}/`;
+  }
+  // 3) 도착지만 있으면 장소 검색
+  if(item.to){
+    const q = encodeURIComponent(item.to);
+    return `https://www.google.com/maps/search/?api=1&query=${q}`;
+  }
+  return "";
+}
+function labelTransport(t){
+  if(t==="walking") return "도보";
+  if(t==="transit") return "대중교통";
+  if(t==="driving") return "택시/차량";
+  return "없음";
+}
+
+/** =========================
+ *  3) 상태
+ *  ========================= */
+let data = loadData();
+saveData(data); // 최초 저장
+let activeTab = "2/15";
+let editMode = false;
+
+const tabsEl = document.getElementById("tabs");
+const contentRoot = document.getElementById("contentRoot");
+
+const editToggle = document.getElementById("editModeToggle");
+const addBtn = document.getElementById("addItemBtn");
+const resetBtn = document.getElementById("resetBtn");
+const exportBtn = document.getElementById("exportBtn");
+const importFile = document.getElementById("importFile");
+
+/** =========================
+ *  4) 렌더링
+ *  ========================= */
+const TAB_ORDER = ["2/15","2/16","2/17","☔ 우천","📌 필수정보"];
+
+function renderTabs(){
+  tabsEl.innerHTML = TAB_ORDER.map(k=>{
+    return `<button class="${k===activeTab?'active':''}" data-tab="${k}">${k}</button>`;
+  }).join("");
+
+  tabsEl.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      activeTab = btn.dataset.tab;
+      render();
+updateWeather();
+    });
+  });
+}
+
+function render(){
+  renderTabs();
+
+  const isInfo = (activeTab === "📌 필수정보");
+  document.getElementById("toolbar").style.display = isInfo ? "none" : "flex";
+
+  if(isInfo){
+    contentRoot.innerHTML = renderInfo();
+    return;
+  }
+
+  const list = data[activeTab] || [];
+  contentRoot.innerHTML = list.map(item=>renderCard(item)).join("");
+
+  // 편집 이벤트
+  if(editMode){
+    contentRoot.querySelectorAll("[data-action]").forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const action = el.dataset.action;
+        const id = el.dataset.id;
+        if(action==="save") return onSave(id);
+        if(action==="delete") return onDelete(id);
+      });
+    });
   }
 }
 
-// 첫 화면(2/15) 자동 로드
-window.addEventListener("DOMContentLoaded", ()=>loadWeather(0));
+function renderCard(item){
+  const url = mapsUrl(item);
+  const showMap = url && item.transport !== "none";
+  const moveLine = (item.transport !== "none")
+    ? `교통: ${labelTransport(item.transport)}${(item.from && item.to) ? ` · ${escapeHtml(item.from)} → ${escapeHtml(item.to)}` : ""}`
+    : "";
 
+  return `
+    <div class="card" data-id="${item.id}">
+      <div class="card-header">
+        <div style="min-width:0">
+          <div class="time">${escapeHtml(item.time || "")}</div>
+          <div class="title">${escapeHtml(item.title || "")}</div>
+          <div class="meta">
+            ${moveLine ? `<div>${moveLine}</div>` : ""}
+            ${item.notes ? `<div style="margin-top:6px">${escapeHtml(item.notes)}</div>` : ""}
+          </div>
+          ${showMap ? `<a class="map-btn" href="${url}" target="_blank" rel="noopener">지도 열기</a>` : ""}
+        </div>
+        <div class="tag">${escapeHtml(item.tag || "")}</div>
+      </div>
+
+      ${editMode ? renderEditForm(item) : ""}
+    </div>
+  `;
+}
+
+function renderEditForm(item){
+  return `
+    <div class="edit-row">
+      <div class="grid2">
+        <input placeholder="시간 (예: 09:00–11:30)" value="${escapeAttr(item.time||"")}" data-field="time" data-id="${item.id}">
+        <input placeholder="태그 (예: 이동/식사/쇼)" value="${escapeAttr(item.tag||"")}" data-field="tag" data-id="${item.id}">
+      </div>
+
+      <input placeholder="제목" value="${escapeAttr(item.title||"")}" data-field="title" data-id="${item.id}">
+
+      <div class="grid2">
+        <select data-field="transport" data-id="${item.id}">
+          <option value="none" ${item.transport==="none"?"selected":""}>이동 없음</option>
+          <option value="walking" ${item.transport==="walking"?"selected":""}>도보</option>
+          <option value="transit" ${item.transport==="transit"?"selected":""}>대중교통(MTR)</option>
+          <option value="driving" ${item.transport==="driving"?"selected":""}>택시/차량</option>
+        </select>
+        <input placeholder="출발지 (예: Hong Kong Disneyland Hotel)" value="${escapeAttr(item.from||"")}" data-field="from" data-id="${item.id}">
+      </div>
+
+      <input placeholder="도착지 (예: Hong Kong Disneyland Park)" value="${escapeAttr(item.to||"")}" data-field="to" data-id="${item.id}">
+
+      <textarea rows="3" placeholder="메모/디테일" data-field="notes" data-id="${item.id}">${escapeHtml(item.notes||"")}</textarea>
+
+      <div class="edit-actions">
+        <button class="small-btn" data-action="save" data-id="${item.id}">저장</button>
+        <button class="small-btn danger" data-action="delete" data-id="${item.id}">삭제</button>
+      </div>
+    </div>
+  `;
+}
+
+/** =========================
+ *  5) 편집 로직
+ *  ========================= */
+function onDelete(id){
+  data[activeTab] = (data[activeTab]||[]).filter(x=>x.id!==id);
+  saveData(data);
+  render();
+}
+function onSave(id){
+  const fields = contentRoot.querySelectorAll(`[data-id="${id}"][data-field]`);
+  const patch = {};
+  fields.forEach(el=>{
+    const key = el.dataset.field;
+    patch[key] = el.value;
+  });
+
+  data[activeTab] = (data[activeTab]||[]).map(item=>{
+    if(item.id !== id) return item;
+    return {...item, ...patch};
+  });
+
+  saveData(data);
+  render();
+}
+
+/** =========================
+ *  6) 툴바 이벤트
+ *  ========================= */
+editToggle.addEventListener("change", ()=>{
+  editMode = editToggle.checked;
+  addBtn.disabled = !editMode;
+  resetBtn.disabled = !editMode;
+  render();
+});
+
+addBtn.addEventListener("click", ()=>{
+  const newItem = {
+    id: crypto.randomUUID(),
+    time: "",
+    title: "",
+    tag: "",
+    transport: "none",
+    from: "",
+    to: "",
+    notes: ""
+  };
+  data[activeTab] = [newItem, ...(data[activeTab]||[])];
+  saveData(data);
+  render();
+});
+
+resetBtn.addEventListener("click", ()=>{
+  if(!confirm("정말 초기화할까요? (저장된 편집 내용이 사라져요)")) return;
+  data = structuredClone(DEFAULT_DATA);
+  saveData(data);
+  render();
+});
+
+exportBtn.addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "hk-trip-schedule.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+importFile.addEventListener("change", async ()=>{
+  const file = importFile.files?.[0];
+  if(!file) return;
+  const text = await file.text();
+  try{
+    const obj = JSON.parse(text);
+    data = obj;
+    saveData(data);
+    render();
+    alert("가져오기 완료!");
+  }catch{
+    alert("JSON 형식이 올바르지 않아요. 내보내기 파일을 그대로 가져와 주세요.");
+  }finally{
+    importFile.value = "";
+  }
+});
+
+/** =========================
+ *  7) 필수정보 렌더
+ *  ========================= */
+function renderInfo(){
+  return `
+    <details open>
+      <summary>💳 돈/결제/옥토퍼스 <span class="pill">여행 중 자주 봄</span></summary>
+      <div class="info">
+        <ul>
+          <li><b>옥토퍼스 카드</b>: 교통/MTR/페리/편의점에서 매우 유용</li>
+          <li><b>카드 결제</b>: 대부분 가능(호텔/대형 식당/편의점)</li>
+          <li><b>현금</b>: 소액만 준비(로컬/간식/소규모 상점)</li>
+          <li><b>팁</b>: 택시/식당은 상황 따라 소액 팁(강제는 아님)</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>💱 환전/현금 사용 팁</summary>
+      <div class="info">
+        <ul>
+          <li>공항 도착 후 <b>ATM로 소액 HKD</b> 먼저 확보(가장 편함)</li>
+          <li>환전은 <b>필요할 때만</b> 소액 단위로 (현금 과다 보유 X)</li>
+          <li>아이 동행이라 <b>이동/간식</b> 용도로 현금 300~600HKD 정도면 충분한 편</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>📱 eSIM 사용 매뉴얼</summary>
+      <div class="info">
+        <ol style="margin:8px 0 0 18px;">
+          <li>한국에서 QR로 eSIM 설치</li>
+          <li>홍콩 도착 후 <b>셀룰러 데이터</b>를 eSIM으로 설정</li>
+          <li><b>데이터 로밍 ON</b>(상품에 따라 필요) · 음성은 카톡/라인 사용</li>
+          <li>안 되면: 비행기모드 ON/OFF → 재부팅 → APN 확인 순</li>
+        </ol>
+      </div>
+    </details>
+
+    <details>
+      <summary>🧸 아이 동반 체크</summary>
+      <div class="info">
+        <ul>
+          <li>디즈니 날은 <b>낮잠(13~15시)</b>이 핵심</li>
+          <li>유모차: 실외 이동 많으면 필수, 실내 쇼로 리듬 조절</li>
+          <li>비/추위 대비: 얇은 겉옷 + 우비/방수 커버</li>
+        </ul>
+      </div>
+    </details>
+
+    <div class="card" style="margin-top:16px">
+      <div class="title">✅ 사용 팁</div>
+      <div class="meta" style="margin-top:8px">
+        • 상단 탭에서 날짜 이동<br>
+        • <b>스케줄 편집 모드</b> 켜면 일정 추가/수정/삭제 가능<br>
+        • 이동 일정은 출발지/도착지를 적으면 <b>지도 열기</b> 버튼이 자동으로 생김
+      </div>
+    </div>
+  `;
+}
+
+/** =========================
+ *  8) XSS 안전 출력
+ *  ========================= */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[s]));
+}
+
+function formatNotes(txt){
+  if(!txt) return "";
+  // HTML escape 후 줄바꿈을 <br>로 변환
+  return escapeHtml(String(txt)).replace(/
+/g, "<br>");
+}
+
+
+function escapeAttr(str){
+  return escapeHtml(str).replace(/\n/g," ");
+}
+
+/** 최초 렌더 */
+render();
 </script>
-
 </body>
 </html>
