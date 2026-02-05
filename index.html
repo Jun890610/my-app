@@ -232,6 +232,24 @@ header.topbar{
 .btnRow{display:flex;flex-wrap:wrap;gap:8px}
 .btn.small{padding:8px 10px;font-size:13px;border-radius:12px}
 
+
+/* ===== 필수정보(Info) 탭 스타일 ===== */
+.info-wrap { padding: 18px 0 6px; }
+.info-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.info-card {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+.info-card h3 { margin: 0 0 10px; font-size: 16px; }
+.info-list { margin: 0; padding-left: 18px; }
+.info-list li { margin: 8px 0; line-height: 1.45; }
+.info-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+.btn.small { padding: 8px 10px; border-radius: 999px; font-size: 13px; }
+.muted { color: rgba(0,0,0,0.60); font-size: 13px; }
+
 </style>
 </head>
 
@@ -745,94 +763,85 @@ if(importFile) importFile.addEventListener("change", async ()=>{
 /** =========================
  *  7) 필수정보 렌더
  *  ========================= */
-function renderInfo(){
+function renderInfo() {
+  // 필수정보 탭: eSIM/환전/옥토퍼스/응급 + 호텔 주변 추천(구글맵 링크)
+  const gm = (q) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+  const gmd = (from, to, mode='transit') => `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=${mode}`;
+
   return `
-    <details open>
-      <summary>💳 돈/결제/옥토퍼스 <span class="pill">여행 중 자주 봄</span></summary>
-      <div class="info">
-        <ul>
-          <li><b>옥토퍼스 카드</b>: 교통/MTR/페리/편의점에서 매우 유용</li>
-          <li><b>카드 결제</b>: 대부분 가능(호텔/대형 식당/편의점)</li>
-          <li><b>현금</b>: 소액만 준비(로컬/간식/소규모 상점)</li>
-          <li><b>팁</b>: 택시/식당은 상황 따라 소액 팁(강제는 아님)</li>
-        </ul>
-      </div>
-    </details>
+    <div class="info-wrap">
+      <div class="info-grid">
+        <section class="info-card">
+          <h3>📌 여행 필수 체크</h3>
+          <ul class="info-list">
+            <li>
+              <b>eSIM / 데이터</b><br/>
+              <span class="muted">비행기 내리면 먼저 eSIM 켜기 → 데이터/로밍 OFF 확인 → 지도/메신저 정상 작동 확인.</span>
+            </li>
+            <li>
+              <b>환전/현금</b><br/>
+              <span class="muted">공항 ATM에서 <b>소액 인출(HKD)</b>로 시작(택시/간식/예비). 이후 필요할 때 추가 인출.</span>
+            </li>
+            <li>
+              <b>옥토퍼스(Octopus)</b><br/>
+              <span class="muted">대중교통/편의점 결제에 유용. 충전은 역/편의점에서 가능. (카드/현금 둘 다 되는 곳 많음)</span>
+            </li>
+            <li>
+              <b>교통 결제</b><br/>
+              <span class="muted">택시/차량: 카드 되는 경우도 있지만 <b>현금</b> 준비하면 편함. 지하철(MTR)은 옥토퍼스/비접촉 결제 가능.</span>
+            </li>
+            <li>
+              <b>응급/병원</b><br/>
+              <span class="muted">아이 컨디션 안 좋으면 무리 금지. 가까운 병원/응급실은 아래 호텔 주변 리스트에서 바로 검색 가능.</span>
+            </li>
+          </ul>
+        </section>
 
-    <details>
-      <summary>💱 환전/현금 사용 팁</summary>
-      <div class="info">
-        <ul>
-          <li>공항 도착 후 <b>ATM로 소액 HKD</b> 먼저 확보(가장 편함)</li>
-          <li>환전은 <b>필요할 때만</b> 소액 단위로 (현금 과다 보유 X)</li>
-          <li>아이 동행이라 <b>이동/간식</b> 용도로 현금 300~600HKD 정도면 충분한 편</li>
-        </ul>
-      </div>
-    </details>
+        <section class="info-card">
+          <h3>💳 결제/예산 메모</h3>
+          <ul class="info-list">
+            <li><b>카드 + 현금</b>: 카드 위주 + 현금은 교통/간식/비상용.</li>
+            <li><b>팁</b>: 보통 필수 아님(고급 호텔/레스토랑은 서비스 차지 포함이 많음).</li>
+            <li><b>아이 동선</b>: 이동은 “짧게 + 중간 휴식” 기준으로 계획(낮잠/간식 타임 확보).</li>
+          </ul>
+        </section>
 
-    <details>
-      <summary>📱 eSIM 사용 매뉴얼</summary>
-      <div class="info">
-        <ol style="margin:8px 0 0 18px;">
-          <li>한국에서 QR로 eSIM 설치</li>
-          <li>홍콩 도착 후 <b>셀룰러 데이터</b>를 eSIM으로 설정</li>
-          <li><b>데이터 로밍 ON</b>(상품에 따라 필요) · 음성은 카톡/라인 사용</li>
-          <li>안 되면: 비행기모드 ON/OFF → 재부팅 → APN 확인 순</li>
-        </ol>
-      </div>
-    </details>
+        <section class="info-card">
+          <h3>🏨 2/15 숙소 주변: The Ritz-Carlton, Hong Kong (ICC)</h3>
+          <div class="info-actions">
+            <a class="btn small" href="${gm('The Ritz-Carlton, Hong Kong')}">호텔 위치(구글맵)</a>
+            <a class="btn small" href="${gm('Elements Mall, Hong Kong')}">Elements 쇼핑몰</a>
+            <a class="btn small" href="${gm('Hong Kong Palace Museum')}">HK Palace Museum</a>
+            <a class="btn small" href="${gm('West Kowloon Cultural District')}">West Kowloon 산책</a>
+            <a class="btn small" href="${gm('hospital near The Ritz-Carlton, Hong Kong')}">근처 병원 검색</a>
+          </div>
+          <p class="muted">동선 팁: ICC/Elements는 실내 이동이 많아서 아이/유모차에 편해.</p>
+        </section>
 
-    <details>
-      <summary>🧸 아이 동반 체크</summary>
-      <div class="info">
-        <ul>
-          <li>디즈니 날은 <b>낮잠(13~15시)</b>이 핵심</li>
-          <li>유모차: 실외 이동 많으면 필수, 실내 쇼로 리듬 조절</li>
-          <li>비/추위 대비: 얇은 겉옷 + 우비/방수 커버</li>
-        </ul>
-      </div>
-    </details>
+        <section class="info-card">
+          <h3>🏨 2/16 숙소 주변: Hong Kong Disneyland Hotel / Disney Explorers Lodge</h3>
+          <div class="info-actions">
+            <a class="btn small" href="${gm('Hong Kong Disneyland Hotel')}">디즈니랜드 호텔</a>
+            <a class="btn small" href="${gm('Disney Explorers Lodge')}">Explorers Lodge</a>
+            <a class="btn small" href="${gm('Inspiration Lake, Hong Kong Disneyland Resort')}">Inspiration Lake</a>
+            <a class="btn small" href="${gm('Citygate Outlets')}">Citygate Outlets</a>
+            <a class="btn small" href="${gm('hospital near Hong Kong Disneyland')}">근처 병원 검색</a>
+          </div>
+          <p class="muted">2/16은 디즈니 올인이라면, 호텔은 실제 예약한 한 곳 기준으로만 보게 해도 OK.</p>
+        </section>
 
-    <div class="card" style="margin-top:16px">
-      <div class="title">✅ 사용 팁</div>
-      <div class="meta" style="margin-top:8px">
-        • 상단 탭에서 날짜 이동<br>
-        • <b>스케줄 편집 모드</b> 켜면 일정 추가/수정/삭제 가능<br>
-        • 이동 일정은 출발지/도착지를 적으면 <b>지도 열기</b> 버튼이 자동으로 생김
+        <section class="info-card">
+          <h3>🗺️ 빠른 길찾기</h3>
+          <div class="info-actions">
+            <a class="btn small" href="${gmd('Hong Kong International Airport', 'The Ritz-Carlton, Hong Kong', 'driving')}">공항 → 리츠칼튼</a>
+            <a class="btn small" href="${gmd('The Ritz-Carlton, Hong Kong', 'Hong Kong Disneyland Hotel', 'transit')}">리츠칼튼 → 디즈니 호텔</a>
+            <a class="btn small" href="${gmd('Hong Kong Disneyland Hotel', 'Hong Kong International Airport', 'driving')}">디즈니 → 공항</a>
+          </div>
+          <p class="muted">※ 길찾기는 교통상황/시간대에 따라 달라질 수 있어. 출발 직전에 한 번만 확인하면 돼.</p>
+        </section>
       </div>
     </div>
-  
-    <details>
-      <summary>🏨 호텔 주변 (관광/쇼핑/병원)</summary>
-      <div class="info">
-        <div class="muted">버튼을 누르면 구글맵에서 ‘숙소 주변’ 검색이 바로 열려요.</div>
-
-        <div class="hotelBlock">
-          <div class="hotelName">2/15 숙소: The Ritz-Carlton, Hong Kong (ICC)</div>
-          <div class="btnRow">
-            <a class="btn small" target="_blank" href="${gmSearch('tourist attractions near The Ritz-Carlton, Hong Kong')}">관광</a>
-            <a class="btn small" target="_blank" href="${gmSearch('shopping mall near The Ritz-Carlton, Hong Kong')}">쇼핑몰</a>
-            <a class="btn small" target="_blank" href="${gmSearch('restaurant near The Ritz-Carlton, Hong Kong family')}">가족 식사</a>
-            <a class="btn small" target="_blank" href="${gmSearch('hospital near The Ritz-Carlton, Hong Kong')}">병원</a>
-            <a class="btn small" target="_blank" href="${gmSearch('pharmacy near The Ritz-Carlton, Hong Kong')}">약국</a>
-            <a class="btn small" target="_blank" href="${gmSearch('pediatric clinic near The Ritz-Carlton, Hong Kong')}">소아과</a>
-          </div>
-        </div>
-
-        <div class="hotelBlock">
-          <div class="hotelName">2/16 숙소: Hong Kong Disneyland Hotel (Disneyland Resort)</div>
-          <div class="btnRow">
-            <a class="btn small" target="_blank" href="${gmSearch('tourist attractions near Hong Kong Disneyland Hotel')}">관광</a>
-            <a class="btn small" target="_blank" href="${gmSearch('shopping near Hong Kong Disneyland Hotel')}">쇼핑</a>
-            <a class="btn small" target="_blank" href="${gmSearch('restaurant near Hong Kong Disneyland Hotel family')}">가족 식사</a>
-            <a class="btn small" target="_blank" href="${gmSearch('hospital near Hong Kong Disneyland Hotel')}">병원</a>
-            <a class="btn small" target="_blank" href="${gmSearch('pharmacy near Hong Kong Disneyland Hotel')}">약국</a>
-            <a class="btn small" target="_blank" href="${gmSearch('pediatric clinic near Hong Kong Disneyland Hotel')}">소아과</a>
-          </div>
-        </div>
-      </div>
-    </details>
-`;
+  `;
 }
 
 /** =========================
