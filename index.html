@@ -221,6 +221,14 @@ header.topbar{
   .header-weather .row{ justify-content: center; grid-template-columns: auto auto auto; }
 }
 
+
+/* === 주변정보(호텔) 버튼 UI === */
+.muted{color:#777;font-size:13px;line-height:1.4}
+.hotelBlock{margin-top:12px;padding:12px;border:1px solid rgba(0,0,0,.08);border-radius:14px;background:#fafafa}
+.hotelName{font-weight:800;margin-bottom:8px}
+.btnRow{display:flex;flex-wrap:wrap;gap:8px}
+.btn.small{padding:8px 10px;font-size:13px;border-radius:12px}
+
 </style>
 </head>
 
@@ -789,7 +797,38 @@ function renderInfo(){
         • 이동 일정은 출발지/도착지를 적으면 <b>지도 열기</b> 버튼이 자동으로 생김
       </div>
     </div>
-  `;
+  
+    <details>
+      <summary>🏨 호텔 주변 (관광/쇼핑/병원)</summary>
+      <div class="info">
+        <div class="muted">버튼을 누르면 구글맵에서 ‘숙소 주변’ 검색이 바로 열려요.</div>
+
+        <div class="hotelBlock">
+          <div class="hotelName">2/15 숙소: The Ritz-Carlton, Hong Kong (ICC)</div>
+          <div class="btnRow">
+            <a class="btn small" target="_blank" href="${gmSearch('tourist attractions near The Ritz-Carlton, Hong Kong')}">관광</a>
+            <a class="btn small" target="_blank" href="${gmSearch('shopping mall near The Ritz-Carlton, Hong Kong')}">쇼핑몰</a>
+            <a class="btn small" target="_blank" href="${gmSearch('restaurant near The Ritz-Carlton, Hong Kong family')}">가족 식사</a>
+            <a class="btn small" target="_blank" href="${gmSearch('hospital near The Ritz-Carlton, Hong Kong')}">병원</a>
+            <a class="btn small" target="_blank" href="${gmSearch('pharmacy near The Ritz-Carlton, Hong Kong')}">약국</a>
+            <a class="btn small" target="_blank" href="${gmSearch('pediatric clinic near The Ritz-Carlton, Hong Kong')}">소아과</a>
+          </div>
+        </div>
+
+        <div class="hotelBlock">
+          <div class="hotelName">2/16 숙소: Hong Kong Disneyland Hotel (Disneyland Resort)</div>
+          <div class="btnRow">
+            <a class="btn small" target="_blank" href="${gmSearch('tourist attractions near Hong Kong Disneyland Hotel')}">관광</a>
+            <a class="btn small" target="_blank" href="${gmSearch('shopping near Hong Kong Disneyland Hotel')}">쇼핑</a>
+            <a class="btn small" target="_blank" href="${gmSearch('restaurant near Hong Kong Disneyland Hotel family')}">가족 식사</a>
+            <a class="btn small" target="_blank" href="${gmSearch('hospital near Hong Kong Disneyland Hotel')}">병원</a>
+            <a class="btn small" target="_blank" href="${gmSearch('pharmacy near Hong Kong Disneyland Hotel')}">약국</a>
+            <a class="btn small" target="_blank" href="${gmSearch('pediatric clinic near Hong Kong Disneyland Hotel')}">소아과</a>
+          </div>
+        </div>
+      </div>
+    </details>
+`;
 }
 
 /** =========================
@@ -898,3 +937,6 @@ render();
 </script>
 </body>
 </html>
+// Google Maps: 검색 링크 생성 (API key 불필요)
+const gmSearch = (q) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+
